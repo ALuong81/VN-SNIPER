@@ -1,0 +1,15 @@
+xgboost
+vnstock==0.2.9
+beautifulsoup4
+lxml
+requests
+pandas
+numpy
+pytz
+python-dotenv
+requests
+lightgbm
+scikit-learn
+joblib
+matplotlib
+ta==0.11.0x
