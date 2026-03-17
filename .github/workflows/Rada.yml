@@ -1,0 +1,96 @@
+name: VN-SNIPER
+
+on:
+
+  # chạy tự động
+  schedule:
+    - cron: "20 2 * * 1-5"   # 9:20 giờ VN
+    - cron: "30 6 * * 1-5"   # 13:30 giờ VN
+    - cron: "30 8 * * 1-5"   # 17:30 giờ VN
+
+  # cho phép chạy tay
+  workflow_dispatch:
+
+  # cho phép ghi dữ liệu
+permissions:
+ contents: write
+
+jobs:
+
+  rada-scan:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+
+    # -------------------------
+    # Checkout source
+    # -------------------------
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+
+    # -------------------------
+    # Setup Python
+    # -------------------------
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+
+    # -------------------------
+    # Cache pip
+    # -------------------------
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+
+    # -------------------------
+    # Install dependencies
+    # -------------------------
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+
+    # -------------------------
+    # Run radar (retry if API fail)
+    # -------------------------
+
+    - name: Run VN-SNIPER
+      run: |
+
+        for i in 1 2 3
+        do
+          echo "Run attempt $i"
+          python -m engine.main_engine && break
+          echo "Retrying..."
+          sleep 10
+        done
+
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+
+    # -------------------------
+    # Notify error to telegram
+    # -------------------------
+
+    - name: Send error notification
+      if: failure()
+      run: |
+
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+        -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+        -d text="🚨 RADA SCANNER ERROR - CHECK GITHUB ACTION LOG"
