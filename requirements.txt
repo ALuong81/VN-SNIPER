@@ -12,4 +12,4 @@ lightgbm
 scikit-learn
 joblib
 matplotlib
-ta==0.11.0x
+ta
