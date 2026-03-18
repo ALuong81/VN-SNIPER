@@ -1,10 +1,10 @@
 import asyncio
-from data.market_data import load_stock
+from data.market_data import stock_historical_data
 
 # ===== LOAD TOÀN BỘ SYMBOL =====
 def load_all_symbols():
     try:
-        from vnstock import listing
+        from vnstock import stock_historical_data
         df = listing.symbols_by_exchange()
 
         symbols = df["symbol"].tolist()
