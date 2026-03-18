@@ -31,7 +31,7 @@ def calc_market_return(stocks):
 
     return sum(returns) / len(returns) if returns else 0
     
-    def run():
+def run():
 
     print("STEP 1: SCAN")
 
