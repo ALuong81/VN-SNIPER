@@ -65,7 +65,7 @@ def run():
 
     # ===== gắn leader flag =====
     for s in stocks:
-        if leaders.get(s["sector"]) == s["symbol"]:
+        if leaders.get(s.get("sector")) == s.get("symbol"):
             s["is_leader"] = True
         else:
             s["is_leader"] = False
