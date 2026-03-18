@@ -1,25 +1,22 @@
 import asyncio
 
-from analysis.position_manager import manage_position
-from analysis.sector_full import detect_sector
+from engine.async_scanner_engine import scan_market_async
 
+from analysis.meta_score import score_stock
 from analysis.relative_strength import calc_rs
-from analysis.sector_leader import find_sector_leaders
-
-from analysis.market_full import market_full
 from analysis.sector_full import detect_sector, sector_top
+from analysis.sector_leader import find_sector_leaders
+from analysis.market_full import market_full
 from analysis.enrich_engine import enrich_stock
 
-from engine.async_scanner_engine import scan_market_async
-from analysis.meta_score import score_stock
-from analysis.market_engine import analyze_market
 from signals.sniper_selector import select_sniper
-from risk.engine import apply_risk
+from analysis.position_manager import manage_position
+
 from report.telegram_report import send_report
 
 
+# ===== MARKET RETURN =====
 def calc_market_return(stocks):
-
     returns = []
 
     for s in stocks:
@@ -31,7 +28,9 @@ def calc_market_return(stocks):
             continue
 
     return sum(returns) / len(returns) if returns else 0
-    
+
+
+# ===== MAIN =====
 def run():
 
     print("STEP 1: SCAN")
@@ -39,75 +38,71 @@ def run():
     stocks = asyncio.run(scan_market_async())
 
     if not stocks:
-        print("No data")
+        print("❌ No data")
         return
+
+    print(f"Loaded: {len(stocks)}")
 
     # ===== SCORE =====
     for s in stocks:
         s["meta_score"] = score_stock(s)
 
-    # ===== MARKET =====
-    market = analyze_market(stocks)
+    # ===== FILTER SỚM =====
+    stocks = [s for s in stocks if s.get("meta_score", 0) >= 50]
 
-    # ===== market return =====
+    if not stocks:
+        print("❌ No stocks after score filter")
+        return
+
+    # ===== MARKET RETURN =====
     market_ret = calc_market_return(stocks)
 
     # ===== RS =====
     for s in stocks:
         s["rs"] = calc_rs(s, market_ret)
 
-    # ===== GẮN SECTOR =====
+    # ===== SECTOR =====
     for s in stocks:
         s["sector"] = detect_sector(s["symbol"])
-    
-    # ===== leader =====
+
+    # ===== LEADER =====
     leaders = find_sector_leaders(stocks)
 
-    # ===== gắn leader flag =====
     for s in stocks:
-        if leaders.get(s.get("sector")) == s.get("symbol"):
-            s["is_leader"] = True
-        else:
-            s["is_leader"] = False
-        
-    # ===== FILTER =====
-    stocks = [s for s in stocks if s["meta_score"] >= 50]
+        s["is_leader"] = leaders.get(s.get("sector")) == s.get("symbol")
+
+    # ===== MARKET ANALYSIS =====
+    market = market_full(stocks)
+
+    # ===== SECTOR TOP =====
+    sectors = sector_top(stocks)
 
     # ===== SNIPER =====
-    print("STEP 3: SNIPER")   
-   
+    print("STEP 2: SNIPER")
+
     sniper = select_sniper(stocks)
-        
+
     if not sniper:
         print("⚠ No sniper picks")
         return
-     print(f"Sniper picks: {len(picks)}")
 
+    print(f"Sniper picks: {len(sniper)}")
+
+    # ===== POSITION =====
     for s in sniper:
         pm = manage_position(s)
         if pm:
             s.update(pm)
-        
-    # ===== enrich =====
-    for s in stocks:
-        s["sector"] = detect_sector(s["symbol"])
-        s["meta_score"] = score_stock(s)
 
-    # ===== market =====
-    market = market_full(stocks)
-
-    # ===== sector =====
-    sectors = sector_top(stocks)
-
-    # ===== sniper =====
-    sniper = select_sniper(stocks)
-
-    # ===== enrich sniper =====
+    # ===== ENRICH =====
     sniper = [enrich_stock(s) for s in sniper]
 
     # ===== REPORT =====
+    print("STEP 3: REPORT")
+
     send_report(sniper, market, sectors)
-    
+
+    print("✅ DONE")
 
 
 if __name__ == "__main__":
