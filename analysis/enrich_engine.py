@@ -50,6 +50,7 @@ def enrich_stock(s):
         "super_stock": "TIỀM NĂNG" if s["meta_score"] > 80 else "BÌNH THƯỜNG",
         "rank": "SIÊU MẠNH" if s["meta_score"] > 80 else "MẠNH",
         "rs": "SIÊU MẠNH" if s.get("rs", 0) > 0 else "YẾU",
+        "leader" = "CÓ" if s.get("is_leader") else "KHÔNG",
         "risk": "BÌNH THƯỜNG"
     })
 
