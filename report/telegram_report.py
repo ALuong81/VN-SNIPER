@@ -17,7 +17,7 @@ def send_report(sniper, market, sectors):
 
     for i, s in enumerate(sniper, 1):
 
-        price = round(s["close"].iloc[-1], 2)
+        price = round(s["close"].iloc[-1]/1000, 2)
 
         print(f"""
 🔹 Mục tiêu #{i}: {s["symbol"]}
