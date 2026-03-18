@@ -1,7 +1,11 @@
 from analysis.utils import last, mean
 from analysis.breakout_filter import is_valid_breakout
 
+
 def enrich_stock(s):
+
+    if not s or "close" not in s or "volume" not in s:
+        return None
 
     close = s["close"]
     volume = s["volume"]
@@ -13,6 +17,9 @@ def enrich_stock(s):
     vol = last(volume)
     avg = mean(volume)
 
+    if price is None or ma20 is None or ma50 is None:
+        return None
+        
     # ===== TREND =====
     if price > ma20 > ma50:
         trend = "ĐỒNG THUẬN MẠNH"
@@ -36,8 +43,11 @@ def enrich_stock(s):
         flow = "TRUNG BÌNH"
     else:
         flow = "YẾU"
-valid = is_valid_breakout(s)
-    
+
+    # ===== VALID BREAKOUT =====
+    valid = is_valid_breakout(s)
+
+    # ===== UPDATE =====
     s.update({
         "trend_multi_tf": trend,
         "breakout_prob": breakout,
@@ -48,23 +58,27 @@ valid = is_valid_breakout(s)
         "supply": "BÌNH THƯỜNG",
         "super_breakout": "THẤP",
         "early_breakout": "KHÔNG",
-        "super_stock": "TIỀM NĂNG" if s["meta_score"] > 80 else "BÌNH THƯỜNG",
-        "rank": "SIÊU MẠNH" if s["meta_score"] > 80 else "MẠNH",
+        "super_stock": "TIỀM NĂNG" if s.get("meta_score", 0) > 80 else "BÌNH THƯỜNG",
+        "rank": "SIÊU MẠNH" if s.get("meta_score", 0) > 80 else "MẠNH",
         "rs": "SIÊU MẠNH" if s.get("rs", 0) > 0 else "YẾU",
         "leader": "CÓ" if s.get("is_leader") else "KHÔNG",
-        "breakout_quality" : "CHUẨN" if valid else "NGHI NGỜ",
-        "entry_type" : s.get("type", "UNKNOWN"),
-        "action" : s.get("action", "CHỜ"),
-        "profit" : s.get("profit", 0),
-        "trailing_sl"] = s.get("trailing_sl", 0),
+        "breakout_quality": "CHUẨN" if valid else "NGHI NGỜ",
+        "entry_type": s.get("type", "UNKNOWN"),
+        "action": s.get("action", "CHỜ"),
+        "profit": s.get("profit", 0),
+        "trailing_sl": s.get("trailing_sl", 0),
         "risk": "BÌNH THƯỜNG"
     })
 
-if s.get("rr", 0) > 2:
-    s["entry_quality"] = "RẤT ĐẸP"
-elif s.get("rr", 0) > 1.5:
-    s["entry_quality"] = "ỔN"
-else:
-    s["entry_quality"] = "KÉM"
+    # ===== ENTRY QUALITY =====
+    rr = s.get("rr", 0)
+
+    if rr > 2:
+        s["entry_quality"] = "RẤT ĐẸP"
+    elif rr > 1.5:
+        s["entry_quality"] = "ỔN"
+    else:
+        s["entry_quality"] = "KÉM"
 
     return s
+    
