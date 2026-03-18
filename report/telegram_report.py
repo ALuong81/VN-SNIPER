@@ -28,7 +28,7 @@ def send_report(sniper, market, sectors):
 • Cắt lỗ: {round(price*0.92,2)}
 • Trạng thái: THEO DÕI - THỊ TRƯỜNG XẤU
 • Ngành: {s["sector"]}
-• Cổ phiếu dẫn dắt ngành: CÓ
+• Cổ phiếu dẫn dắt ngành: {s["leader"]}
 • Xu hướng đa khung: {s["trend_multi_tf"]}
 • Khả năng bứt phá: {s["breakout_prob"]}
 • Trạng thái cung: {s["supply"]}
