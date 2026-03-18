@@ -1,7 +1,8 @@
 import asyncio
 from data.market_data import load_stock
 
-SYMBOLS = []  # load từ listing
+#SYMBOLS = []  # load từ listing
+SYMBOLS = ["VCG", "HBC", "VND", "SSI", "VIC"]
 
 async def fetch(symbol):
     return load_stock(symbol)
