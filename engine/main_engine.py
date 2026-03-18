@@ -1,6 +1,7 @@
 import asyncio
 
 from analysis.position_manager import manage_position
+from analysis.sector_full import detect_sector
 
 from analysis.relative_strength import calc_rs
 from analysis.sector_leader import find_sector_leaders
@@ -55,6 +56,10 @@ def run():
     for s in stocks:
         s["rs"] = calc_rs(s, market_ret)
 
+    # ===== GẮN SECTOR =====
+    for s in stocks:
+        s["sector"] = detect_sector(s["symbol"])
+    
     # ===== leader =====
     leaders = find_sector_leaders(stocks)
 
