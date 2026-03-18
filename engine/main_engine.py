@@ -1,5 +1,7 @@
 import asyncio
 
+from analysis.position_manager import manage_position
+
 from analysis.relative_strength import calc_rs
 from analysis.sector_leader import find_sector_leaders
 
