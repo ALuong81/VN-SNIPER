@@ -71,6 +71,11 @@ def calc_market_return(stocks):
     # ===== SNIPER =====
     sniper = select_sniper(stocks)
 
+    for s in picks:
+        pm = manage_position(s)
+        if pm:
+            s.update(pm)
+        
     # ===== enrich =====
     for s in stocks:
         s["sector"] = detect_sector(s["symbol"])
