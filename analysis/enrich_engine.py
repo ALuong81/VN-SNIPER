@@ -37,15 +37,6 @@ def enrich_stock(s):
     else:
         flow = "YẾU"
 valid = is_valid_breakout(s)
-
-s["entry_type"] = s.get("type", "UNKNOWN")
-
-if s.get("rr", 0) > 2:
-    s["entry_quality"] = "RẤT ĐẸP"
-elif s.get("rr", 0) > 1.5:
-    s["entry_quality"] = "ỔN"
-else:
-    s["entry_quality"] = "KÉM"
     
     s.update({
         "trend_multi_tf": trend,
@@ -60,13 +51,20 @@ else:
         "super_stock": "TIỀM NĂNG" if s["meta_score"] > 80 else "BÌNH THƯỜNG",
         "rank": "SIÊU MẠNH" if s["meta_score"] > 80 else "MẠNH",
         "rs": "SIÊU MẠNH" if s.get("rs", 0) > 0 else "YẾU",
-        "leader" = "CÓ" if s.get("is_leader") else "KHÔNG",
-        "breakout_quality" = "CHUẨN" if valid else "NGHI NGỜ",
+        "leader": "CÓ" if s.get("is_leader") else "KHÔNG",
+        "breakout_quality" : "CHUẨN" if valid else "NGHI NGỜ",
+        "entry_type" : s.get("type", "UNKNOWN"),
+        "action" : s.get("action", "CHỜ"),
+        "profit" : s.get("profit", 0),
+        "trailing_sl"] = s.get("trailing_sl", 0),
         "risk": "BÌNH THƯỜNG"
     })
 
-s["action"] = s.get("action", "CHỜ")
-s["profit"] = s.get("profit", 0)
-s["trailing_sl"] = s.get("trailing_sl", 0)
+if s.get("rr", 0) > 2:
+    s["entry_quality"] = "RẤT ĐẸP"
+elif s.get("rr", 0) > 1.5:
+    s["entry_quality"] = "ỔN"
+else:
+    s["entry_quality"] = "KÉM"
 
     return s
