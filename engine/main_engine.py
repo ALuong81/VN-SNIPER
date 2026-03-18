@@ -1,5 +1,9 @@
 import asyncio
 
+from analysis.market_full import market_full
+from analysis.sector_full import detect_sector, sector_top
+from analysis.enrich_engine import enrich_stock
+
 from engine.async_scanner_engine import scan_market_async
 from analysis.meta_score import score_stock
 from analysis.market_engine import analyze_market
@@ -31,8 +35,22 @@ def run():
     # ===== SNIPER =====
     sniper = select_sniper(stocks)
 
-    # ===== RISK =====
-    sniper = [apply_risk(s) for s in sniper]
+    # ===== enrich =====
+    for s in stocks:
+        s["sector"] = detect_sector(s["symbol"])
+        s["meta_score"] = score_stock(s)
+
+    # ===== market =====
+    market = market_full(stocks)
+
+    # ===== sector =====
+    sectors = sector_top(stocks)
+
+    # ===== sniper =====
+    sniper = select_sniper(stocks)
+
+    # ===== enrich sniper =====
+    sniper = [enrich_stock(s) for s in sniper]
 
     # ===== REPORT =====
     send_report(sniper, market)
