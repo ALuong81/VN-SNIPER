@@ -38,6 +38,15 @@ def enrich_stock(s):
         flow = "YẾU"
 valid = is_valid_breakout(s)
 
+s["entry_type"] = s.get("type", "UNKNOWN")
+
+if s.get("rr", 0) > 2:
+    s["entry_quality"] = "RẤT ĐẸP"
+elif s.get("rr", 0) > 1.5:
+    s["entry_quality"] = "ỔN"
+else:
+    s["entry_quality"] = "KÉM"
+    
     s.update({
         "trend_multi_tf": trend,
         "breakout_prob": breakout,
