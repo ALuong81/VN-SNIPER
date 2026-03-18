@@ -43,9 +43,14 @@ def enrich_stock(s):
         "smart_money": flow,
         "whale": "DÒNG TIỀN LỚN" if vol > avg * 1.5 else "BÌNH THƯỜNG",
         "ai_pattern": "BREAKOUT PATTERN" if price >= high else "NO PATTERN",
+        "vcp": "KHÔNG",
+        "supply": "BÌNH THƯỜNG",
+        "super_breakout": "THẤP",
+        "early_breakout": "KHÔNG",
         "super_stock": "TIỀM NĂNG" if s["meta_score"] > 80 else "BÌNH THƯỜNG",
         "rank": "SIÊU MẠNH" if s["meta_score"] > 80 else "MẠNH",
-        "rs": "SIÊU MẠNH" if s.get("rs", 0) > 0 else "YẾU"
+        "rs": "SIÊU MẠNH" if s.get("rs", 0) > 0 else "YẾU",
+        "risk": "BÌNH THƯỜNG"
     })
 
     return s
