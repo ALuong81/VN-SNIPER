@@ -65,4 +65,8 @@ else:
         "risk": "BÌNH THƯỜNG"
     })
 
+s["action"] = s.get("action", "CHỜ")
+s["profit"] = s.get("profit", 0)
+s["trailing_sl"] = s.get("trailing_sl", 0)
+
     return s
