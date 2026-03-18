@@ -1,5 +1,8 @@
 import asyncio
 
+from analysis.relative_strength import calc_rs
+from analysis.sector_leader import find_sector_leaders
+
 from analysis.market_full import market_full
 from analysis.sector_full import detect_sector, sector_top
 from analysis.enrich_engine import enrich_stock
@@ -12,7 +15,21 @@ from risk.engine import apply_risk
 from report.telegram_report import send_report
 
 
-def run():
+def calc_market_return(stocks):
+
+    returns = []
+
+    for s in stocks:
+        try:
+            c = s["close"]
+            r = (c.iloc[-1] - c.iloc[-20]) / c.iloc[-20]
+            returns.append(r)
+        except:
+            continue
+
+    return sum(returns) / len(returns) if returns else 0
+    
+    def run():
 
     print("STEP 1: SCAN")
 
@@ -29,6 +46,23 @@ def run():
     # ===== MARKET =====
     market = analyze_market(stocks)
 
+    # ===== market return =====
+    market_ret = calc_market_return(stocks)
+
+    # ===== RS =====
+    for s in stocks:
+        s["rs"] = calc_rs(s, market_ret)
+
+    # ===== leader =====
+    leaders = find_sector_leaders(stocks)
+
+    # ===== gắn leader flag =====
+    for s in stocks:
+        if leaders.get(s["sector"]) == s["symbol"]:
+            s["is_leader"] = True
+        else:
+            s["is_leader"] = False
+        
     # ===== FILTER =====
     stocks = [s for s in stocks if s["meta_score"] >= 50]
 
