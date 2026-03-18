@@ -1,80 +1,43 @@
 import asyncio
-from data.market_data import stock_historical_data
-
-# ===== LOAD TOÀN BỘ SYMBOL =====
-def load_all_symbols():
-    try:
-        from vnstock import stock_historical_data
-        df = listing.symbols_by_exchange()
-
-        symbols = df["symbol"].tolist()
-
-        # lọc symbol rác
-        symbols = [s for s in symbols if isinstance(s, str) and len(s) <= 3]
-
-        print(f"Universe loaded: {len(symbols)}")
-
-        return symbols
-
-    except Exception as e:
-        print("Load symbols error:", e)
-        return []
+from data.market_data import get_symbols
+from data.async_market_data import fetch_stock, MAX_CONCURRENT
 
 
-# ===== FETCH 1 STOCK =====
-async def fetch(symbol):
-
-    for attempt in range(3):
-        try:
-            data = await asyncio.wait_for(
-                asyncio.to_thread(load_stock, symbol),
-                timeout=5
-            )
-
-            if not data or "close" not in data:
-                raise ValueError("Invalid data")
-
-            return data
-
-        except Exception as e:
-            print(f"[RETRY {attempt+1}] {symbol}")
-            await asyncio.sleep(0.5)
-
-    return None
-
-
-# ===== MAIN SCAN =====
 async def scan_market_async():
 
-    print("STEP 1: SCAN MARKET")
+    symbols = get_symbols()
 
-    SYMBOLS = load_all_symbols()
-
-    if not SYMBOLS:
-        print("❌ No symbols")
+    if not symbols:
         return []
 
-    # giới hạn test nếu cần
-    SYMBOLS = SYMBOLS[:500]
+    symbols = symbols[:120]
 
-    print(f"Symbols to load: {len(SYMBOLS)}")
+    print("Symbols to load:", len(symbols))
 
-    semaphore = asyncio.Semaphore(20)
+    sem = asyncio.Semaphore(MAX_CONCURRENT)
 
-    async def sem_fetch(s):
-        async with semaphore:
-            return await fetch(s)
+    tasks = [fetch_stock(s, sem) for s in symbols]
 
-    tasks = [sem_fetch(s) for s in SYMBOLS]
+    results = []
+    completed = 0
+    total = len(tasks)
 
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    for coro in asyncio.as_completed(tasks):
 
-    stocks = []
+        try:
+            stock = await coro
 
-    for r in results:
-        if isinstance(r, dict):
-            stocks.append(r)
+            if stock and stock.get("avg_volume", 0) > 50000:
+                results.append(stock)
 
-    print(f"Loaded OK: {len(stocks)} | Failed: {len(SYMBOLS) - len(stocks)}")
+        except:
+            pass
 
-    return stocks
+        completed += 1
+
+        if completed % 10 == 0:
+            print(f"Progress {completed}/{total}")
+
+    print(f"Loaded OK: {len(results)} | Failed: {total - len(results)}")
+
+    return results
