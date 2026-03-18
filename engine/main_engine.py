@@ -53,7 +53,8 @@ def run():
     sniper = [enrich_stock(s) for s in sniper]
 
     # ===== REPORT =====
-    send_report(sniper, market)
+    send_report(sniper, market, sectors)
+    
 
 
 if __name__ == "__main__":
