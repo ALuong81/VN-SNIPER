@@ -29,7 +29,9 @@ def send_report(sniper, market, sectors):
 • Kiểu vào lệnh: {s["entry_type"]}
 • Chất lượng điểm vào: {s["entry_quality"]}
 • Risk/Reward: {s["rr"]}
-• Trạng thái: THEO DÕI - THỊ TRƯỜNG XẤU
+• Lợi nhuận hiện tại: {s["profit"]}%
+• Stop động: {s["trailing_sl"]}
+• Hành động: {s["action"]}
 • Ngành: {s["sector"]}
 • Cổ phiếu dẫn dắt ngành: {s["leader"]}
 • Xu hướng đa khung: {s["trend_multi_tf"]}
