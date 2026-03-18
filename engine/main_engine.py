@@ -74,9 +74,16 @@ def run():
     stocks = [s for s in stocks if s["meta_score"] >= 50]
 
     # ===== SNIPER =====
+    print("STEP 3: SNIPER")   
+   
     sniper = select_sniper(stocks)
+        
+    if not sniper:
+        print("⚠ No sniper picks")
+        return
+     print(f"Sniper picks: {len(picks)}")
 
-    for s in picks:
+    for s in sniper:
         pm = manage_position(s)
         if pm:
             s.update(pm)
