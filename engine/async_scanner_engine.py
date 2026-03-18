@@ -1,15 +1,35 @@
 import asyncio
 from data.market_data import load_stock
 
-SYMBOLS = ["VCG", "HBC", "VND", "SSI", "VIC"]
+# ===== LOAD TOÀN BỘ SYMBOL =====
+def load_all_symbols():
+    try:
+        from vnstock import listing
+        df = listing.symbols_by_exchange()
+
+        symbols = df["symbol"].tolist()
+
+        # lọc symbol rác
+        symbols = [s for s in symbols if isinstance(s, str) and len(s) <= 3]
+
+        print(f"Universe loaded: {len(symbols)}")
+
+        return symbols
+
+    except Exception as e:
+        print("Load symbols error:", e)
+        return []
 
 
-# ===== WRAP SYNC → ASYNC =====
+# ===== FETCH 1 STOCK =====
 async def fetch(symbol):
 
     for attempt in range(3):
         try:
-            data = await asyncio.to_thread(load_stock, symbol)
+            data = await asyncio.wait_for(
+                asyncio.to_thread(load_stock, symbol),
+                timeout=5
+            )
 
             if not data or "close" not in data:
                 raise ValueError("Invalid data")
@@ -17,7 +37,7 @@ async def fetch(symbol):
             return data
 
         except Exception as e:
-            print(f"[RETRY {attempt+1}] {symbol} - {str(e)}")
+            print(f"[RETRY {attempt+1}] {symbol}")
             await asyncio.sleep(0.5)
 
     return None
@@ -26,9 +46,20 @@ async def fetch(symbol):
 # ===== MAIN SCAN =====
 async def scan_market_async():
 
-    print("Start loading...")
+    print("STEP 1: SCAN MARKET")
 
-    semaphore = asyncio.Semaphore(10)  # limit concurrent
+    SYMBOLS = load_all_symbols()
+
+    if not SYMBOLS:
+        print("❌ No symbols")
+        return []
+
+    # giới hạn test nếu cần
+    SYMBOLS = SYMBOLS[:500]
+
+    print(f"Symbols to load: {len(SYMBOLS)}")
+
+    semaphore = asyncio.Semaphore(20)
 
     async def sem_fetch(s):
         async with semaphore:
@@ -44,6 +75,6 @@ async def scan_market_async():
         if isinstance(r, dict):
             stocks.append(r)
 
-    print(f"Loaded OK: {len(stocks)}")
+    print(f"Loaded OK: {len(stocks)} | Failed: {len(SYMBOLS) - len(stocks)}")
 
     return stocks
