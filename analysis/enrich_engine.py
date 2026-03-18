@@ -1,5 +1,5 @@
 from analysis.utils import last, mean
-
+from analysis.breakout_filter import is_valid_breakout
 
 def enrich_stock(s):
 
@@ -36,6 +36,7 @@ def enrich_stock(s):
         flow = "TRUNG BÌNH"
     else:
         flow = "YẾU"
+valid = is_valid_breakout(s)
 
     s.update({
         "trend_multi_tf": trend,
@@ -51,6 +52,7 @@ def enrich_stock(s):
         "rank": "SIÊU MẠNH" if s["meta_score"] > 80 else "MẠNH",
         "rs": "SIÊU MẠNH" if s.get("rs", 0) > 0 else "YẾU",
         "leader" = "CÓ" if s.get("is_leader") else "KHÔNG",
+        "breakout_quality" = "CHUẨN" if valid else "NGHI NGỜ",
         "risk": "BÌNH THƯỜNG"
     })
 
