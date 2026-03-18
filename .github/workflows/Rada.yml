@@ -73,7 +73,7 @@ jobs:
         for i in 1 2 3
         do
           echo "Run attempt $i"
-          python -m py_compile engine.main_engine && break
+          python -m engine.main_engine && break
           echo "Retrying..."
           sleep 10
         done
