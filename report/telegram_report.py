@@ -23,9 +23,12 @@ def send_report(sniper, market, sectors):
 🔹 Mục tiêu #{i}: {s["symbol"]}
 
 • Giá hiện tại: {price}
-• Giá vào dự kiến: {round(price*1.01,2)}
-• Mục tiêu chốt lời: {round(price*1.2,2)}
-• Cắt lỗ: {round(price*0.92,2)}
+• Giá vào dự kiến: {s["entry"]}
+• Mục tiêu chốt lời: {s["tp"]}
+• Cắt lỗ: {s["sl"]}
+• Kiểu vào lệnh: {s["entry_type"]}
+• Chất lượng điểm vào: {s["entry_quality"]}
+• Risk/Reward: {s["rr"]}
 • Trạng thái: THEO DÕI - THỊ TRƯỜNG XẤU
 • Ngành: {s["sector"]}
 • Cổ phiếu dẫn dắt ngành: {s["leader"]}
