@@ -1,44 +1,48 @@
-from vnstock import stock_historical_data
-import pandas as pd
-import time
+from vnstock import listing_companies
+
+INVALID_CACHE = set()
 
 
-def load_stock(symbol):
+def get_symbols():
 
-    for attempt in range(3):
+    try:
+        df = listing_companies()
 
-        try:
-            df = stock_historical_data(
-                symbol=symbol,
-                start_date="2024-01-01",
-                end_date="2026-12-31",
-                resolution="1D"
-            )
+        if df is None or len(df) == 0:
+            return []
 
-            # ===== VALIDATE =====
-            if df is None or len(df) < 60:
-                raise ValueError("Not enough data")
+        if "exchange" in df.columns:
+            df = df[df["exchange"].isin(["HOSE", "HNX"])]
 
-            # ===== CLEAN DATA =====
-            df = df.dropna()
+        symbols = df["ticker"].dropna().tolist()
 
-            if "close" not in df or "volume" not in df:
-                raise ValueError("Missing columns")
+        clean = []
 
-            close = pd.Series(df["close"]).astype(float)
-            volume = pd.Series(df["volume"]).astype(float)
+        for s in symbols:
 
-            if close.isna().all() or volume.isna().all():
-                raise ValueError("Invalid series")
+            if not isinstance(s, str):
+                continue
 
-            return {
-                "symbol": symbol,
-                "close": close.reset_index(drop=True),
-                "volume": volume.reset_index(drop=True)
-            }
+            s = s.strip().upper()
 
-        except Exception as e:
-            print(f"[LOAD FAIL {attempt+1}] {symbol}")
-            time.sleep(0.3)
+            if not s.isalpha():
+                continue
 
-    return None
+            if len(s) != 3:
+                continue
+
+            # lọc rác phổ biến
+            if s.startswith(("X", "Z")):
+                continue
+
+            clean.append(s)
+
+        clean = list(set(clean))
+
+        print("Universe loaded:", len(clean))
+
+        return clean
+
+    except Exception as e:
+        print("Error loading symbols:", e)
+        return []
