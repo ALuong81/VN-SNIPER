@@ -31,6 +31,7 @@ def send_report(sniper, market, sectors):
 • Cổ phiếu dẫn dắt ngành: {s["leader"]}
 • Xu hướng đa khung: {s["trend_multi_tf"]}
 • Khả năng bứt phá: {s["breakout_prob"]}
+• Chất lượng breakout: {s["breakout_quality"]}
 • Trạng thái cung: {s["supply"]}
 • Mô hình VCP: {s["vcp"]}
 • Mô hình AI: {s["ai_pattern"]}
