@@ -1,6 +1,7 @@
 import asyncio
 from data.market_data import load_stock
 from data.symbol_loader import load_symbols
+from utils.sector_utils import fetch_sector_map
 
 
 async def fetch(symbol):
@@ -18,7 +19,7 @@ async def scan_market_async():
 
     if not symbols:
         print("❌ No symbols")
-        return []
+        return [], {}   # 🔥 FIX: luôn return 2 giá trị
 
     semaphore = asyncio.Semaphore(10)
 
@@ -34,4 +35,15 @@ async def scan_market_async():
 
     print(f"Loaded OK: {len(stocks)} | Failed: {len(symbols)-len(stocks)}")
 
-    return stocks
+    # 🔥 FETCH SECTOR (THÊM MỚI)
+    symbol_list = [s["symbol"] for s in stocks]
+
+    sector_map = fetch_sector_map(symbol_list)
+
+    # 🔥 GÁN SECTOR VÀO STOCK
+    for s in stocks:
+        symbol = s["symbol"]
+        s["sector"] = sector_map.get(symbol, "KHÁC")
+
+    # 🔥 RETURN CHUẨN
+    return stocks, sector_map
