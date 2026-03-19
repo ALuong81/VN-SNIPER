@@ -12,6 +12,7 @@ def compute_entry(s):
     price = last(close)
 
     ma20 = last(close.rolling(20).mean())
+    ma50 = last(close.rolling(50).mean())
 
     high_20 = float(close.tail(20).max())
     low_20 = float(close.tail(20).min())
@@ -19,28 +20,42 @@ def compute_entry(s):
     vol = last(volume)
     avg_vol = mean(volume, 20)
 
-    # ===== ZONE =====
-    pullback_zone = price <= high_20 * 1.02
+    # ===== BREAKOUT VALIDATION =====
+    breakout = price >= high_20 * 0.98
 
-    # ===== VOLUME =====
-    vol_dry = vol < avg_vol * 0.9
+    # ===== VOLUME CONFIRM =====
+    vol_confirm = vol > avg_vol * 1.2
 
-    # ===== ENTRY TYPE =====
-    if pullback_zone and vol_dry:
-        entry_type = "PULLBACK"
-
-        entry = price
-        tp = price * 1.2
-        sl = ma20 * 0.97
-
-    else:
+    # ===== ENTRY =====
+    if breakout and vol_confirm:
         entry_type = "BREAKOUT"
 
         entry = high_20 * 1.01
-        tp = entry * 1.15
-        sl = low_20 * 0.95
+        sl = ma20 * 0.98
 
-    rr = (tp - entry) / (entry - sl) if (entry - sl) != 0 else 0
+    else:
+        # Pullback only nếu trend đẹp
+        if not (price > ma20 > ma50):
+            return None
+
+        entry_type = "PULLBACK"
+
+        entry = price
+        sl = ma50 * 0.97
+
+    # ===== TP DYNAMIC =====
+    risk = entry - sl
+
+    if risk <= 0:
+        return None
+
+    tp = entry + risk * 2   # RR = 2 chuẩn
+
+    rr = (tp - entry) / risk
+
+    # ===== FILTER KÈO XẤU =====
+    if rr < 1.5:
+        return None
 
     return {
         "entry": round(entry, 2),
