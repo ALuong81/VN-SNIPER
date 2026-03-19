@@ -2,12 +2,9 @@ import requests
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
-from data.sector_dataset import SECTOR_DATA
-
+from data.sector_map_full import SECTOR_DATA
 
 CACHE_PATH = "sector_cache.json"
-
-from data.sector_map_full import SECTOR_MAP
 
 def resolve_sector(symbol, cache):
 
@@ -16,8 +13,8 @@ def resolve_sector(symbol, cache):
         return cache[symbol]
 
     # dataset local (ưu tiên cao)
-    if symbol in SECTOR_MAP:
-        return SECTOR_MAP[symbol]
+    if symbol in SECTOR_DATA:
+        return SECTOR_DATA[symbol]
 
     # API (optional)
     sector = fetch_sector_api(symbol)
