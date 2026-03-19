@@ -1,12 +1,5 @@
 from vnstock import stock_historical_data
 
-def normalize_price(series):
-    # nếu giá > 1000 → chia lại
-    if series.max() > 1000:
-        return series / 1000
-    return series
-
-
 def load_stock(symbol):
 
     try:
@@ -20,15 +13,16 @@ def load_stock(symbol):
         if df is None or len(df) < 60:
             return None
 
-        close = normalize_price(df["close"])
-        volume = df["volume"]
+        # 🚨 FIX SCALE GIÁ
+        if df["close"].max() > 1000:
+            df["close"] = df["close"] / 1000
 
         return {
             "symbol": symbol,
-            "close": close,
-            "volume": volume
+            "close": df["close"],
+            "volume": df["volume"]
         }
 
     except Exception as e:
-        print(f"Load error {symbol}: {e}")
+        print(f"❌ {symbol}: {e}")
         return None
