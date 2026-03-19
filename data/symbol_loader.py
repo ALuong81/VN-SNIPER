@@ -1,5 +1,6 @@
 import csv
-
+import os
+print(">>> USING symbol_loader:", os.path.abspath(__file__))
 
 def load_symbols():
 
