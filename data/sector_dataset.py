@@ -1,57 +1,59 @@
-SECTOR_DATA = {
-    # Ngân hàng
-    "VCB": "Ngân hàng",
-    "BID": "Ngân hàng",
-    "CTG": "Ngân hàng",
-    "TCB": "Ngân hàng",
-    "MBB": "Ngân hàng",
-    "VPB": "Ngân hàng",
-    "ACB": "Ngân hàng",
-    "LPB": "Ngân hàng",
-    "STB": "Ngân hàng",
-    "HDB": "Ngân hàng",
+SECTOR_MAP = {
 
-    # Bất động sản
-    "VIC": "Bất động sản",
-    "VHM": "Bất động sản",
-    "NVL": "Bất động sản",
-    "PDR": "Bất động sản",
-    "KDH": "Bất động sản",
-    "HDG": "Bất động sản",
-    "DXG": "Bất động sản",
+# ===== NGÂN HÀNG =====
+"VCB":"Ngân hàng","BID":"Ngân hàng","CTG":"Ngân hàng","TCB":"Ngân hàng",
+"MBB":"Ngân hàng","VPB":"Ngân hàng","ACB":"Ngân hàng","HDB":"Ngân hàng",
+"STB":"Ngân hàng","LPB":"Ngân hàng","EIB":"Ngân hàng","MSB":"Ngân hàng",
 
-    # Chứng khoán
-    "SSI": "Chứng khoán",
-    "VND": "Chứng khoán",
-    "HCM": "Chứng khoán",
-    "VCI": "Chứng khoán",
-    "SHS": "Chứng khoán",
+# ===== CHỨNG KHOÁN =====
+"SSI":"Chứng khoán","VND":"Chứng khoán","HCM":"Chứng khoán","VCI":"Chứng khoán",
+"SHS":"Chứng khoán","MBS":"Chứng khoán","FTS":"Chứng khoán","AGR":"Chứng khoán",
 
-    # Thép
-    "HPG": "Thép",
-    "HSG": "Thép",
-    "NKG": "Thép",
+# ===== BẤT ĐỘNG SẢN =====
+"VIC":"Bất động sản","VHM":"Bất động sản","NVL":"Bất động sản",
+"PDR":"Bất động sản","KDH":"Bất động sản","DXG":"Bất động sản",
+"HDG":"Bất động sản","DIG":"Bất động sản","CEO":"Bất động sản",
+"AGG":"Bất động sản","NLG":"Bất động sản","SCR":"Bất động sản",
 
-    # Dầu khí
-    "GAS": "Dầu khí",
-    "PLX": "Dầu khí",
-    "PVD": "Dầu khí",
-    "PVS": "Dầu khí",
+# ===== THÉP =====
+"HPG":"Thép","HSG":"Thép","NKG":"Thép",
 
-    # Bán lẻ
-    "MWG": "Bán lẻ",
-    "FRT": "Bán lẻ",
-    "PNJ": "Bán lẻ",
+# ===== DẦU KHÍ =====
+"GAS":"Dầu khí","PLX":"Dầu khí","PVD":"Dầu khí","PVS":"Dầu khí","BSR":"Dầu khí",
 
-    # Điện
-    "POW": "Điện",
-    "NT2": "Điện",
+# ===== BÁN LẺ =====
+"MWG":"Bán lẻ","FRT":"Bán lẻ","PNJ":"Bán lẻ","DGW":"Bán lẻ",
 
-    # Thực phẩm
-    "VNM": "Thực phẩm",
-    "MSN": "Thực phẩm",
+# ===== THỰC PHẨM =====
+"VNM":"Thực phẩm","MSN":"Thực phẩm","SAB":"Thực phẩm","DBC":"Thực phẩm",
 
-    # Xây dựng
-    "CTD": "Xây dựng",
-    "HBC": "Xây dựng",
+# ===== THỦY SẢN =====
+"ANV":"Thủy sản","VHC":"Thủy sản","IDI":"Thủy sản",
+
+# ===== ĐIỆN =====
+"POW":"Điện","NT2":"Điện","REE":"Điện",
+
+# ===== XÂY DỰNG =====
+"CTD":"Xây dựng","HBC":"Xây dựng","FCN":"Xây dựng","PC1":"Xây dựng",
+
+# ===== CÔNG NGHỆ =====
+"FPT":"Công nghệ","CMG":"Công nghệ","ELC":"Công nghệ",
+
+# ===== HÓA CHẤT =====
+"DGC":"Hóa chất","DCM":"Hóa chất","DPM":"Hóa chất","CSV":"Hóa chất",
+
+# ===== NHỰA =====
+"BMP":"Nhựa","NTP":"Nhựa",
+
+# ===== CẢNG BIỂN =====
+"GMD":"Cảng biển","HAH":"Cảng biển","VSC":"Cảng biển",
+
+# ===== DỆT MAY =====
+"TCM":"Dệt may","STK":"Dệt may","GIL":"Dệt may",
+
+# ===== KHU CÔNG NGHIỆP =====
+"KBC":"KCN","IDC":"KCN","SZC":"KCN","BCM":"KCN",
+
+# ===== KHÁC =====
+"AAA":"Nhựa","PAN":"Nông nghiệp","HAG":"Nông nghiệp","HNG":"Nông nghiệp"
 }
