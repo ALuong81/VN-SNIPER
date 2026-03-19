@@ -7,7 +7,26 @@ from data.sector_dataset import SECTOR_DATA
 
 CACHE_PATH = "sector_cache.json"
 
+from data.sector_map_full import SECTOR_MAP
 
+def resolve_sector(symbol, cache):
+
+    # cache
+    if symbol in cache:
+        return cache[symbol]
+
+    # dataset local (ưu tiên cao)
+    if symbol in SECTOR_MAP:
+        return SECTOR_MAP[symbol]
+
+    # API (optional)
+    sector = fetch_sector_api(symbol)
+    if sector:
+        cache[symbol] = sector
+        return sector
+
+    return "KHÁC"
+    
 def load_sector_cache():
     if os.path.exists(CACHE_PATH):
         with open(CACHE_PATH, "r") as f:
