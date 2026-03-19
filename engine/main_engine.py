@@ -16,7 +16,7 @@ def run():
 
     print("STEP 1: SCAN")
 
-    stocks, sector_map = asyncio.run(scan_market_async())
+    stocks = asyncio.run(scan_market_async())
 
     if not stocks:
         print("No data")
