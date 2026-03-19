@@ -1,11 +1,39 @@
 def analyze_market(stocks):
 
-    up = sum(1 for s in stocks if s["close"].iloc[-1] > s["close"].iloc[-2])
-    ratio = round(up / len(stocks) * 100, 1)
+    up = 0
+    total = 0
 
-    if ratio < 40:
-        return {"status": "RỦI RO", "trend": "GIẢM"}
-    elif ratio < 60:
-        return {"status": "TRUNG LẬP", "trend": "SIDEWAY"}
+    for s in stocks:
+        try:
+            c = s["close"]
+
+            if len(c) < 2:
+                continue
+
+            if c.iloc[-1] > c.iloc[-2]:
+                up += 1
+
+            total += 1
+
+        except:
+            continue
+
+    breadth = round(up / total * 100, 2) if total else 0
+
+    # ===== TREND =====
+    if breadth > 60:
+        trend = "TĂNG"
+        status = "TỐT"
+    elif breadth > 40:
+        trend = "TRUNG TÍNH"
+        status = "BÌNH THƯỜNG"
     else:
-        return {"status": "TỐT", "trend": "TĂNG"}
+        trend = "GIẢM"
+        status = "RỦI RO"
+
+    return {
+        "breadth": breadth,
+        "trend": trend,
+        "status": status,
+        "momentum": "Uptrend" if trend == "TĂNG" else "Sideway"
+    }
