@@ -20,7 +20,7 @@ def load_symbols(limit=None):
     Load symbol từ CSV hoặc database, loại bỏ invalid symbol,
     đảm bảo luôn có cột 'sector' (fallback = 'KHÁC')
     """
-    df = pd.read_csv("data/symbols.csv")
+    df = pd.read_csv("data/full_symbols.csv")
 
     # Fallback cột sector nếu không có
     if 'sector' not in df.columns:
