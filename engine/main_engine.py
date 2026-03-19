@@ -7,6 +7,10 @@ from analysis.sector_full import sector_top
 from signals.sniper_selector import select_sniper
 from analysis.enrich_engine import enrich_stock
 
+import pandas as pd
+
+df = pd.read_csv("data/full_symbols.csv")
+print("COLUMNS:", df.columns.tolist())
 
 def run():
 
