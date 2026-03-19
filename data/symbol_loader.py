@@ -1,23 +1,18 @@
 import pandas as pd
 
-def load_symbol_data():
+def load_symbols(limit=200):
 
-    df = pd.read_csv("data/full_symbols.csv")
+    try:
+        df = pd.read_csv("data/full_symbols.csv")
 
-    df.columns = [c.lower().strip() for c in df.columns]
+        df = df.dropna(subset=["symbol"])
 
-    df = df.rename(columns={
-        "secter": "sector"  # fix typo
-    })
+        symbols = df["symbol"].astype(str).str.strip().tolist()
 
-    return df
+        print(f"Universe loaded: {len(symbols)}")
 
+        return symbols[:limit]
 
-def build_symbol_map():
-
-    df = load_symbol_data()
-
-    return {
-        row["symbol"]: row["sector"]
-        for _, row in df.iterrows()
-    }
+    except Exception as e:
+        print(f"❌ Load symbols error: {e}")
+        return []
