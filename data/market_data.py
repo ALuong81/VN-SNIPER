@@ -1,6 +1,11 @@
-import os
-print(">>> USING market_data:", os.path.abspath(__file__))
 from vnstock import stock_historical_data
+
+def normalize_price(series):
+    # nếu giá > 1000 → chia lại
+    if series.max() > 1000:
+        return series / 1000
+    return series
+
 
 def load_stock(symbol):
 
@@ -15,17 +20,15 @@ def load_stock(symbol):
         if df is None or len(df) < 60:
             return None
 
-        df = df.dropna()
-
-        # 🔥 FIX GIÁ (QUAN TRỌNG NHẤT)
-        df["close"] = df["close"].astype(float) / 1000
+        close = normalize_price(df["close"])
+        volume = df["volume"]
 
         return {
-            "symbol": symbol.strip().upper(),
-            "close": df["close"],
-            "volume": df["volume"]
+            "symbol": symbol,
+            "close": close,
+            "volume": volume
         }
 
     except Exception as e:
-        print(f"Load error: {symbol}")
+        print(f"Load error {symbol}: {e}")
         return None
