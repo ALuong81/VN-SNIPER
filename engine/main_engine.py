@@ -27,7 +27,7 @@ def run():
     # ===== GẮN SECTOR =====
     for s in stocks:
         symbol = s["symbol"].strip().upper()
-        s["sector"] = sector_map.get(symbol, "KHÁC")
+        s["sector"] = "KHÁC"
 
     # ===== SCORE =====
     for s in stocks:
