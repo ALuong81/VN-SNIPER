@@ -1,26 +1,20 @@
-SECTOR_MAP = {
-    "VCG": "XÂY DỰNG",
-    "HBC": "XÂY DỰNG",
-    "VHC": "THỦY SẢN",
-    "ANV": "THỦY SẢN",
-    "NVL": "BẤT ĐỘNG SẢN",
-    "KDH": "BẤT ĐỘNG SẢN",
-}
-
-def detect_sector(symbol):
-    return SECTOR_MAP.get(symbol, "KHÁC")
-
-
 def sector_top(stocks):
 
-    score = {}
+    sector_score = {}
 
     for s in stocks:
+        sector = s.get("sector", "KHÁC")
 
-        sec = s.get("sector", "KHÁC")
+        score = s.get("meta_score", 0)
 
-        score[sec] = score.get(sec, 0) + s.get("meta_score", 0)
+        sector_score.setdefault(sector, []).append(score)
 
-    ranked = sorted(score.items(), key=lambda x: x[1], reverse=True)
+    result = []
 
-    return ranked[:3]
+    for k, v in sector_score.items():
+        avg = sum(v) / len(v)
+        result.append((k, round(avg, 2)))
+
+    result.sort(key=lambda x: x[1], reverse=True)
+
+    return result[:3]
