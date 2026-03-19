@@ -1,5 +1,5 @@
 
-    import pandas as pd
+import pandas as pd
 import requests
 
 def is_valid_symbol(symbol: str) -> bool:
