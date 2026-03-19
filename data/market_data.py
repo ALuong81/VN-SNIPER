@@ -1,4 +1,3 @@
-from vnstock import stock_historical_data
 import os
 print(">>> USING market_data:", os.path.abspath(__file__))
 from vnstock import stock_historical_data
