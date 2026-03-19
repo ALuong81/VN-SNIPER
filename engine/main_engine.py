@@ -1,81 +1,43 @@
 import asyncio
 
 from engine.async_scanner_engine import scan_market_async
-
 from analysis.meta_score import score_stock
-from analysis.relative_strength import calc_rs
-from analysis.sector_full import detect_sector, sector_top
-from analysis.sector_leader import find_sector_leaders
-from analysis.market_full import market_full
+from analysis.market_engine import analyze_market
+from analysis.sector_full import sector_top
+from signals.sniper_selector import select_sniper
 from analysis.enrich_engine import enrich_stock
 
-from signals.sniper_selector import select_sniper
-from analysis.position_manager import manage_position
 
-from report.telegram_report import send_report
-
-
-# ===== MARKET RETURN =====
-def calc_market_return(stocks):
-    returns = []
-
-    for s in stocks:
-        try:
-            c = s["close"]
-            r = (c.iloc[-1] - c.iloc[-20]) / c.iloc[-20]
-            returns.append(r)
-        except:
-            continue
-
-    return sum(returns) / len(returns) if returns else 0
-
-
-# ===== MAIN =====
 def run():
 
     print("STEP 1: SCAN")
 
-    stocks = asyncio.run(scan_market_async())
+    stocks, sector_map = asyncio.run(scan_market_async())
 
     if not stocks:
-        print("❌ No data")
+        print("No data")
         return
 
     print(f"Loaded: {len(stocks)}")
+
+    # ===== GẮN SECTOR =====
+    for s in stocks:
+        symbol = s["symbol"].strip().upper()
+        s["sector"] = sector_map.get(symbol, "KHÁC")
 
     # ===== SCORE =====
     for s in stocks:
         s["meta_score"] = score_stock(s)
 
-    # ===== FILTER SỚM =====
-    stocks = [s for s in stocks if s.get("meta_score", 0) >= 50]
+    # ===== FILTER =====
+    stocks = [s for s in stocks if s["meta_score"] >= 40]
 
     if not stocks:
         print("❌ No stocks after score filter")
         return
 
-    # ===== MARKET RETURN =====
-    market_ret = calc_market_return(stocks)
-
-    # ===== RS =====
-    for s in stocks:
-        s["rs"] = calc_rs(s, market_ret)
-
-    # ===== SECTOR =====
-    for s in stocks:
-        s["sector"] = detect_sector(s["symbol"])
-
-    # ===== LEADER =====
-    leaders = find_sector_leaders(stocks)
-
-    for s in stocks:
-        s["is_leader"] = leaders.get(s.get("sector")) == s.get("symbol")
-
-    # ===== MARKET ANALYSIS =====
-    market = market_full(stocks)
-
-    # ===== SECTOR TOP =====
-    sectors = sector_top(stocks)
+    # ===== MARKET =====
+    market = analyze_market(stocks)
 
     # ===== SNIPER =====
     print("STEP 2: SNIPER")
@@ -88,19 +50,42 @@ def run():
 
     print(f"Sniper picks: {len(sniper)}")
 
-    # ===== POSITION =====
-    for s in sniper:
-        pm = manage_position(s)
-        if pm:
-            s.update(pm)
-
     # ===== ENRICH =====
     sniper = [enrich_stock(s) for s in sniper]
 
-    # ===== REPORT =====
-    print("STEP 3: REPORT")
+    # ===== SECTOR =====
+    sectors = sector_top(stocks)
 
-    send_report(sniper, market, sectors)
+    # ===== REPORT =====
+    print("\nSTEP 3: REPORT\n")
+
+    print(f"📈 Trạng thái thị trường: {market['status']}")
+    print(f"📊 Xu hướng thị trường: {market['trend']}")
+    print(f"⏱ Nhịp thị trường: {market['momentum']}")
+    print(f"• Độ rộng thị trường: {'Rộng' if market['breadth'] > 60 else 'Hẹp'}")
+    print(f"• Tỷ lệ cổ phiếu tăng: {market['breadth']}%\n")
+
+    print("🔥 TOP NGÀNH MẠNH")
+    for i, (name, score) in enumerate(sectors, 1):
+        print(f"{i}. {name} ({score})")
+
+    print("\n------------------------------------\n")
+
+    for i, s in enumerate(sniper, 1):
+
+        price = float(s["close"].iloc[-1])
+
+        print(f"🔹 Mục tiêu #{i}: {s['symbol']}\n")
+
+        print(f"• Giá hiện tại: {round(price,2)}")
+        print(f"• Giá vào dự kiến: {s['entry']}")
+        print(f"• Mục tiêu chốt lời: {s['tp']}")
+        print(f"• Cắt lỗ: {s['sl']}")
+        print(f"• Ngành: {s['sector']}")
+        print(f"• Xu hướng đa khung: {s['trend_multi_tf']}")
+        print(f"• Khả năng bứt phá: {s['breakout_prob']}")
+        print(f"• Meta Score: {s['meta_score']}")
+        print()
 
     print("✅ DONE")
 
