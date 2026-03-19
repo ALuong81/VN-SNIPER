@@ -1,53 +1,44 @@
 def send_report(sniper, market, sectors):
 
-    print(f"""
-📈 Trạng thái thị trường: {market["status"]}
-📊 Xu hướng thị trường: {market["trend"]}
-⏱ Nhịp thị trường: {market["timing"]}
-• Độ rộng thị trường: {market["breadth"]}
-• Tỷ lệ cổ phiếu tăng: {market["ratio"]}%
+    print("\n📈 Trạng thái thị trường:", market["status"])
+    print("📊 Xu hướng thị trường:", market["trend"])
+    print("⏱ Nhịp thị trường:", market["phase"])
+    print("• Độ rộng thị trường:", market["breadth"])
+    print("• Tỷ lệ cổ phiếu tăng:", f'{market["advancers"]:.1f}%')
 
-🔥 TOP NGÀNH MẠNH
-""")
-
-    for i, (sec, val) in enumerate(sectors, 1):
-        print(f"{i}. {sec} ({round(val,2)})")
+    print("\n🔥 TOP NGÀNH MẠNH")
+    for i, (name, score) in enumerate(sectors[:3], 1):
+        print(f"{i}. {name} ({round(score,2)})")
 
     print("\n------------------------------------")
 
     for i, s in enumerate(sniper, 1):
 
-        price = round(s["close"].iloc[-1]/1000, 2)
+        print(f"\n🔹 Mục tiêu #{i}: {s['symbol']}")
 
         print(f"""
-🔹 Mục tiêu #{i}: {s["symbol"]}
-
-• Giá hiện tại: {price}
-• Giá vào dự kiến: {s["entry"]}
-• Mục tiêu chốt lời: {s["tp"]}
-• Cắt lỗ: {s["sl"]}
-• Kiểu vào lệnh: {s["entry_type"]}
-• Chất lượng điểm vào: {s["entry_quality"]}
-• Risk/Reward: {s["rr"]}
-• Lợi nhuận hiện tại: {s["profit"]}%
-• Stop động: {s["trailing_sl"]}
-• Hành động: {s["action"]}
-• Ngành: {s["sector"]}
-• Cổ phiếu dẫn dắt ngành: {s["leader"]}
-• Xu hướng đa khung: {s["trend_multi_tf"]}
-• Khả năng bứt phá: {s["breakout_prob"]}
-• Chất lượng breakout: {s["breakout_quality"]}
-• Trạng thái cung: {s["supply"]}
-• Mô hình VCP: {s["vcp"]}
-• Mô hình AI: {s["ai_pattern"]}
-• Dòng tiền tổ chức: {s["smart_money"]}
-• Dòng tiền thông minh: {s["smart_money"]}
-• Super Breakout: {s["super_breakout"]}
-• Early Breakout: {s["early_breakout"]}
-• Dòng tiền cá voi: {s["whale"]}
-• Super Stock: {s["super_stock"]}
-• Xếp hạng: {s["rank"]}
-• Meta Score: {s["meta_score"]}
-• Sức mạnh tương đối: {s["rs"]}
-• Cảnh báo rủi ro: {s["risk"]}
+• Giá hiện tại: {round(s['close'].iloc[-1],2)}
+• Giá vào dự kiến: {s.get("entry")}
+• Mục tiêu chốt lời: {s.get("tp")}
+• Cắt lỗ: {s.get("sl")}
+• Trạng thái: {s.get("action","THEO DÕI")}
+• Ngành: {s.get("sector")}
+• Cổ phiếu dẫn dắt ngành: {s.get("leader")}
+• Xu hướng đa khung: {s.get("trend_multi_tf")}
+• Khả năng bứt phá: {s.get("breakout_prob")}
+• Trạng thái cung: {s.get("supply")}
+• Mô hình VCP: {s.get("vcp")}
+• Mô hình AI: {s.get("ai_pattern")}
+• Dòng tiền tổ chức: {s.get("smart_money")}
+• Dòng tiền thông minh: {s.get("smart_money")}
+• Super Breakout: {s.get("super_breakout")}
+• Early Breakout: {s.get("early_breakout")}
+• Dòng tiền cá voi: {s.get("whale")}
+• Super Stock: {s.get("super_stock")}
+• Xếp hạng: {s.get("rank")}
+• Meta Score: {s.get("meta_score")}
+• Sức mạnh tương đối: {s.get("rs")}
+• Cảnh báo rủi ro: {s.get("risk")}
 """)
+
+    print("\n✅ DONE")
