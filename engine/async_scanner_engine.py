@@ -1,35 +1,24 @@
 import asyncio
+import random
+
 from data.market_data import load_stock
 from data.symbol_loader import load_symbols
 
 
-INVALID_CACHE = set()
+async def fetch(symbol):
 
-
-async def fetch(item):
-
-    symbol = item["symbol"]
-
-    if symbol in INVALID_CACHE:
-        return None
-
-    for attempt in range(2):
+    for attempt in range(3):
         try:
             data = await asyncio.to_thread(load_stock, symbol)
 
             if not data or "close" not in data:
                 raise ValueError("Invalid data")
 
-            # gắn metadata từ CSV
-            data["sector"] = item["sector"]
-            data["exchange"] = item["exchange"]
-
             return data
 
         except Exception as e:
-            print(f"[FAIL] {symbol}")
-            INVALID_CACHE.add(symbol)
-            return None
+            print(f"[RETRY {attempt+1}] {symbol}")
+            await asyncio.sleep(0.3)
 
     return None
 
@@ -38,28 +27,20 @@ async def scan_market_async(limit=120):
 
     print("STEP 1: SCAN MARKET")
 
-    universe = load_symbols()
+    symbols, sector_map = load_symbols()
 
-    if not universe:
-        print("❌ No symbols")
-        return []
+    print(f"Universe loaded: {len(symbols)}")
 
-    # 👉 ưu tiên HOSE trước
-    universe = sorted(universe, key=lambda x: x["exchange"])
+    # 🔥 FIX BIAS
+    random.shuffle(symbols)
 
-    symbols_to_load = universe[:limit]
+    symbols = symbols[:limit]
 
-    print(f"Symbols to load: {len(symbols_to_load)}")
+    print(f"Symbols to load: {len(symbols)}")
 
-    semaphore = asyncio.Semaphore(10)
+    tasks = [fetch(s) for s in symbols]
 
-    async def sem_fetch(s):
-        async with semaphore:
-            return await fetch(s)
-
-    tasks = [sem_fetch(s) for s in symbols_to_load]
-
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    results = await asyncio.gather(*tasks)
 
     stocks = []
 
@@ -67,6 +48,6 @@ async def scan_market_async(limit=120):
         if isinstance(r, dict):
             stocks.append(r)
 
-    print(f"Loaded OK: {len(stocks)} | Failed: {len(symbols_to_load) - len(stocks)}")
+    print(f"Loaded OK: {len(stocks)} | Failed: {len(symbols) - len(stocks)}")
 
-    return stocks
+    return stocks, sector_map
