@@ -1,6 +1,7 @@
 from vnstock import stock_historical_data
 import os
 print(">>> USING market_data:", os.path.abspath(__file__))
+from vnstock import stock_historical_data
 
 def load_stock(symbol):
 
@@ -17,11 +18,11 @@ def load_stock(symbol):
 
         df = df.dropna()
 
-        if len(df) < 60:
-            return None
+        # 🔥 FIX GIÁ (QUAN TRỌNG NHẤT)
+        df["close"] = df["close"].astype(float) / 1000
 
         return {
-            "symbol": symbol,
+            "symbol": symbol.strip().upper(),
             "close": df["close"],
             "volume": df["volume"]
         }
