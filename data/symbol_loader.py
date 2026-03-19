@@ -1,26 +1,12 @@
 import pandas as pd
 
-def ensure_sector_column(df):
-    df = df.copy()
-    df['sector'] = df.get('sector', 'KHAC')
-    df['sector'] = df['sector'].fillna('KHAC')
-    return df
+df = pd.read_csv("data/full_symbols.csv")
 
-def load_symbols(limit=200):
+symbols = df["symbol"].tolist()
+sector_map = dict(zip(df["symbol"], df["sector"]))
 
-    try:
-        df = pd.read_csv("data/full_symbols.csv")
+def load_symbols():
+    return symbols
 
-        df = ensure_sector_column(df)
-        
-        df = df.dropna(subset=["symbol"])
-
-        symbols = df["symbol"].astype(str).str.strip().tolist()
-
-        print(f"Universe loaded: {len(symbols)}")
-
-        return symbols[:limit]
-
-    except Exception as e:
-        print(f"❌ Load symbols error: {e}")
-        return []
+def detect_sector(symbol):
+    return sector_map.get(symbol, "KHÁC")
