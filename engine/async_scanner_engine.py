@@ -1,43 +1,72 @@
 import asyncio
-from data.market_data import get_symbols
-from data.async_market_data import fetch_stock, MAX_CONCURRENT
+from data.market_data import load_stock
+from data.symbol_loader import load_symbols
 
 
-async def scan_market_async():
+INVALID_CACHE = set()
 
-    symbols = get_symbols()
 
-    if not symbols:
+async def fetch(item):
+
+    symbol = item["symbol"]
+
+    if symbol in INVALID_CACHE:
+        return None
+
+    for attempt in range(2):
+        try:
+            data = await asyncio.to_thread(load_stock, symbol)
+
+            if not data or "close" not in data:
+                raise ValueError("Invalid data")
+
+            # gắn metadata từ CSV
+            data["sector"] = item["sector"]
+            data["exchange"] = item["exchange"]
+
+            return data
+
+        except Exception as e:
+            print(f"[FAIL] {symbol}")
+            INVALID_CACHE.add(symbol)
+            return None
+
+    return None
+
+
+async def scan_market_async(limit=120):
+
+    print("STEP 1: SCAN MARKET")
+
+    universe = load_symbols()
+
+    if not universe:
+        print("❌ No symbols")
         return []
 
-    symbols = symbols[:120]
+    # 👉 ưu tiên HOSE trước
+    universe = sorted(universe, key=lambda x: x["exchange"])
 
-    print("Symbols to load:", len(symbols))
+    symbols_to_load = universe[:limit]
 
-    sem = asyncio.Semaphore(MAX_CONCURRENT)
+    print(f"Symbols to load: {len(symbols_to_load)}")
 
-    tasks = [fetch_stock(s, sem) for s in symbols]
+    semaphore = asyncio.Semaphore(10)
 
-    results = []
-    completed = 0
-    total = len(tasks)
+    async def sem_fetch(s):
+        async with semaphore:
+            return await fetch(s)
 
-    for coro in asyncio.as_completed(tasks):
+    tasks = [sem_fetch(s) for s in symbols_to_load]
 
-        try:
-            stock = await coro
+    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            if stock and stock.get("avg_volume", 0) > 50000:
-                results.append(stock)
+    stocks = []
 
-        except:
-            pass
+    for r in results:
+        if isinstance(r, dict):
+            stocks.append(r)
 
-        completed += 1
+    print(f"Loaded OK: {len(stocks)} | Failed: {len(symbols_to_load) - len(stocks)}")
 
-        if completed % 10 == 0:
-            print(f"Progress {completed}/{total}")
-
-    print(f"Loaded OK: {len(results)} | Failed: {total - len(results)}")
-
-    return results
+    return stocks
