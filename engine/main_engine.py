@@ -16,18 +16,24 @@ def run():
 
     print("STEP 1: SCAN")
 
-    stocks = asyncio.run(scan_market_async())
+    stocks, sector_map = asyncio.run(scan_market_async())
+
+    print(f"Loaded: {len(stocks)}")
+
+    # đảm bảo không crash
+    sector_map = sector_map or {}
+
+    # ===== GẮN SECTOR =====
+    
+    for s in stocks:
+        symbol = s["symbol"]
+        s["sector"] = sector_map.get(symbol, "KHÁC")
 
     if not stocks:
         print("No data")
         return
 
     print(f"Loaded: {len(stocks)}")
-
-    # ===== GẮN SECTOR =====
-    for s in stocks:
-        symbol = s["symbol"].strip().upper()
-        s["sector"] = "KHÁC"
 
     # ===== SCORE =====
     for s in stocks:
