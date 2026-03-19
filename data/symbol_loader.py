@@ -1,41 +1,32 @@
-import csv
 import os
 print(">>> USING symbol_loader:", os.path.abspath(__file__))
+import csv
+
+def normalize(symbol):
+    return symbol.strip().upper()
+
 
 def load_symbols():
 
     symbols = []
+    sector_map = {}
 
-    try:
-        with open("data/full_symbols.csv", newline='', encoding="utf-8") as f:
-            reader = csv.DictReader(f)
+    with open("data/full_symbols.csv", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
 
-            for row in reader:
+        for row in reader:
 
-                symbol = row.get("symbol", "").strip().upper()
-                exchange = row.get("exchange", "").strip().upper()
-                sector = row.get("sector", "KHÁC").strip().upper()
+            symbol = normalize(row.get("symbol", ""))
 
-                # 🚨 FILTER CỨNG
-                if not symbol:
-                    continue
+            sector = (
+                row.get("sector")
+                or row.get("secter")
+                or row.get("Sector")
+                or "KHÁC"
+            ).strip().upper()
 
-                if len(symbol) > 5:   # loại mã rác
-                    continue
+            if symbol:
+                symbols.append(symbol)
+                sector_map[symbol] = sector
 
-                if exchange not in ["HOSE", "HNX", "UPCOM"]:
-                    continue
-
-                symbols.append({
-                    "symbol": symbol,
-                    "exchange": exchange,
-                    "sector": sector
-                })
-
-    except Exception as e:
-        print("Load symbols error:", e)
-        return []
-
-    print(f"Universe loaded: {len(symbols)}")
-
-    return symbols
+    return symbols, sector_map
