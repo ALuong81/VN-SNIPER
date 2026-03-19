@@ -1,72 +1,29 @@
-import asyncio
-from data.market_data import load_stock
-from data.symbol_loader import load_symbols
+from vnstock import stock_historical_data
 
+def load_stock(symbol):
 
-INVALID_CACHE = set()
+    try:
+        df = stock_historical_data(
+            symbol=symbol,
+            start_date="2024-01-01",
+            end_date="2026-12-31",
+            resolution="1D"
+        )
 
-
-async def fetch(item):
-
-    symbol = item["symbol"]
-
-    if symbol in INVALID_CACHE:
-        return None
-
-    for attempt in range(2):
-        try:
-            data = await asyncio.to_thread(load_stock, symbol)
-
-            if not data or "close" not in data:
-                raise ValueError("Invalid data")
-
-            # gắn metadata từ CSV
-            data["sector"] = item["sector"]
-            data["exchange"] = item["exchange"]
-
-            return data
-
-        except Exception as e:
-            print(f"[FAIL] {symbol}")
-            INVALID_CACHE.add(symbol)
+        if df is None or len(df) < 60:
             return None
 
-    return None
+        df = df.dropna()
 
+        if len(df) < 60:
+            return None
 
-async def scan_market_async(limit=120):
+        return {
+            "symbol": symbol,
+            "close": df["close"],
+            "volume": df["volume"]
+        }
 
-    print("STEP 1: SCAN MARKET")
-
-    universe = load_symbols()
-
-    if not universe:
-        print("❌ No symbols")
-        return []
-
-    # 👉 ưu tiên HOSE trước
-    universe = sorted(universe, key=lambda x: x["exchange"])
-
-    symbols_to_load = universe[:limit]
-
-    print(f"Symbols to load: {len(symbols_to_load)}")
-
-    semaphore = asyncio.Semaphore(10)
-
-    async def sem_fetch(s):
-        async with semaphore:
-            return await fetch(s)
-
-    tasks = [sem_fetch(s) for s in symbols_to_load]
-
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    stocks = []
-
-    for r in results:
-        if isinstance(r, dict):
-            stocks.append(r)
-
-    print(f"Loaded OK: {len(stocks)} | Failed: {len(symbols_to_load) - len(stocks)}")
-
-    return stocks
+    except Exception as e:
+        print(f"Load error: {symbol}")
+        return None
