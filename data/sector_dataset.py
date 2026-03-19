@@ -1,4 +1,4 @@
-SECTOR_MAP = {
+SECTOR_DATA = {
 
 # ===== NGÂN HÀNG =====
 "VCB":"Ngân hàng","BID":"Ngân hàng","CTG":"Ngân hàng","TCB":"Ngân hàng",
