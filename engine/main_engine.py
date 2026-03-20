@@ -1,4 +1,5 @@
 import asyncio
+from async_symbol_loader_retry_log import load_symbols_retry_log
 
 from engine.async_scanner_engine import scan_market_async
 from analysis.meta_score import score_stock
@@ -16,9 +17,12 @@ def run():
 
     print("STEP 1: SCAN")
 
-    stocks, sector_map = asyncio.run(scan_market_async())
+    stocks, sector_map = asyncio.run(load_symbols_retry_log(limit=200))
 
     print(f"Loaded: {len(stocks)}")
+    
+    for s in stocks[:5]:  # xem 5 stock đầu
+        print(s)
 
     # đảm bảo không crash
     sector_map = sector_map or {}
